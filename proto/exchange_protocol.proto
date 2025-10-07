@@ -1,0 +1,40 @@
+
+syntax = "proto3";
+
+package exchange_protocol;
+
+// структуры для полигонов 
+
+message Point {
+    int32 x = 1;
+    int32 y = 2;
+}
+
+enum PolygonType {
+    INCLUDE = 0;
+    EXCLUDE = 1;
+}
+
+message PolygonConfig {
+    repeated Point points = 1;         // Вершины полигона (>3)
+    PolygonType type      = 2;         // Тип: включающий или исключающий
+    int32 priority        = 3;         // Приоритет (чем выше, тем сильнее)
+    repeated string class_filters = 4; // Список классов для детекции (например, "person", "car")
+}
+
+// запрос - ответ
+
+message DetectionRequest {
+    bytes image_data = 1;                // изображение в формате JPEG/PNG
+    repeated PolygonConfig polygons = 2; // конфигурация полигонов
+}
+
+message DetectionResponse {
+    bytes result_image_data = 1;         // изображение с отрисованными объектами
+}
+
+// сервис
+
+service ObjectDetectorService {
+    rpc DetectObjects(DetectionRequest) returns (DetectionResponse);
+}
