@@ -133,9 +133,9 @@ std::vector<PolygonConfig> LoadPolygonsFromJson(const std::string& filename) {
         std::cerr << "Failed to open polygon config file: " << filename << std::endl;
         return polygons;
     }
-    json j;
-    ifs >> j;
-    for (const auto& poly : j) {
+    json json_object;
+    ifs >> json_object;
+    for (const auto& poly : json_object) {
         std::vector<std::pair<int, int>> points;
         for (const auto& pt : poly["points"]) {
             points.emplace_back(pt[0], pt[1]);
@@ -154,7 +154,7 @@ std::vector<PolygonConfig> LoadPolygonsFromJson(const std::string& filename) {
 }
 
 
-
+// cmd string: ./client input.jpg output.jpg localhost:50051 assets/polygons.json
 int main(int argc, char** argv) {
     std::string server_address = "localhost:50051";
     std::string image_path = "input.jpg";
