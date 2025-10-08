@@ -1,0 +1,14 @@
+[
+  {
+    "points": [[100,100],[500,100],[500,400],[100,400]],
+    "type": "INCLUDE",
+    "priority": 1,
+    "class_filters": ["person", "car"]
+  },
+  {
+    "points": [[200,200],[300,200],[300,300],[200,300]],
+    "type": "EXCLUDE",
+    "priority": 2,
+    "class_filters": ["person"]
+  }
+]
