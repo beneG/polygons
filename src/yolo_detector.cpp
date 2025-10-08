@@ -1,5 +1,7 @@
 #include "yolo_detector.h"
+
 #include <opencv2/dnn.hpp>
+
 #include <fstream>
 #include <iostream>
 
@@ -18,8 +20,9 @@ YoloDetector::YoloDetector(const std::string& cfg,
     std::ifstream ifs(class_names_file);
     std::string line;
     while (std::getline(ifs, line)) {
-        if (!line.empty())
+        if (!line.empty()) {
             class_names_.push_back(line);
+        }
     }
 }
 
@@ -75,10 +78,11 @@ std::vector<Detection> YoloDetector::Detect(const cv::Mat& frame)
         det.class_id = classIds[idx];
         det.confidence = confidences[idx];
         det.bbox = boxes[idx];
-        if (det.class_id >= 0 && det.class_id < static_cast<int>(class_names_.size()))
+        if (det.class_id >= 0 && det.class_id < static_cast<int>(class_names_.size())) {
             det.class_name = class_names_[det.class_id];
-        else
+        } else {
             det.class_name = "unknown";
+        }
         detections.push_back(det);
     }
     return detections;
