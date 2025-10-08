@@ -3,10 +3,9 @@ FROM amd64/ubuntu:22.04
 ENV TZ="Europe/Moscow"
 ENV DEBIAN_FRONTEND="noninteractive"
 
-
 RUN apt-get update && apt-get install -y build-essential g++ cmake git wget
-
 RUN apt-get install -y libopencv-dev
+RUN apt-get install -y nlohmann-json3-dev
 
 WORKDIR /app
 

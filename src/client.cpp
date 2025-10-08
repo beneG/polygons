@@ -5,6 +5,7 @@
 
 #include <grpcpp/grpcpp.h>
 #include <opencv2/opencv.hpp>
+#include <nlohmann/json.hpp>
 
 #include <proto/exchange_protocol.pb.h>
 #include <proto/exchange_protocol.grpc.pb.h>
@@ -19,6 +20,8 @@ using exchange_protocol::DetectionResponse;
 using exchange_protocol::PolygonConfig;
 using exchange_protocol::Point;
 using exchange_protocol::PolygonType;
+
+using json = nlohmann::json;
 
 class ObjectDetectorClient {
 public:
@@ -121,10 +124,42 @@ PolygonConfig CreatePolygon(const std::vector<std::pair<int, int>>& points,
     return polygon;
 }
 
+
+// Loads polygons from a JSON file
+std::vector<PolygonConfig> LoadPolygonsFromJson(const std::string& filename) {
+    std::vector<PolygonConfig> polygons;
+    std::ifstream ifs(filename);
+    if (!ifs) {
+        std::cerr << "Failed to open polygon config file: " << filename << std::endl;
+        return polygons;
+    }
+    json j;
+    ifs >> j;
+    for (const auto& poly : j) {
+        std::vector<std::pair<int, int>> points;
+        for (const auto& pt : poly["points"]) {
+            points.emplace_back(pt[0], pt[1]);
+        }
+        PolygonType type = poly["type"] == "INCLUDE" ? PolygonType::INCLUDE : PolygonType::EXCLUDE;
+        int priority = poly.value("priority", 1);
+        std::vector<std::string> class_filters;
+        if (poly.contains("class_filters")) {
+            for (const auto& c : poly["class_filters"]) {
+                class_filters.push_back(c);
+            }
+        }
+        polygons.push_back(CreatePolygon(points, type, priority, class_filters));
+    }
+    return polygons;
+}
+
+
+
 int main(int argc, char** argv) {
     std::string server_address = "localhost:50051";
     std::string image_path = "input.jpg";
     std::string output_path = "output.jpg";
+    std::string polygons_path = "polygons.json";
     
     if (argc > 1) {
         image_path = argv[1];
@@ -134,6 +169,9 @@ int main(int argc, char** argv) {
     }
     if (argc > 3) {
         server_address = argv[3];
+    }
+    if (argc > 4) {
+        polygons_path = argv[4];
     }
     
     std::cout << "Connecting to server: " << server_address << std::endl;
@@ -145,9 +183,9 @@ int main(int argc, char** argv) {
         grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials())
     );
     
-    // Example: Create some test polygons
-    std::vector<PolygonConfig> polygons;
-    
+    std::vector<PolygonConfig> polygons = LoadPolygonsFromJson(polygons_path);
+
+    /*    
     // INCLUDE polygon - detect objects inside this area
     polygons.push_back(CreatePolygon(
         {{100, 100}, {500, 100}, {500, 400}, {100, 400}},
@@ -163,6 +201,7 @@ int main(int argc, char** argv) {
         2,
         {"person"}
     ));
+    */
     
     // Call detection service
     if (client.DetectObjects(image_path, polygons, output_path)) {
