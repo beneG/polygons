@@ -85,6 +85,13 @@ public:
         
         std::cout << "Result saved to: " << output_path << std::endl;
         
+        // Display result
+        cv::namedWindow("Detection Result", cv::WINDOW_NORMAL);
+        cv::imshow("Detection Result", result_image);
+        std::cout << "Press any key to close..." << std::endl;
+        cv::waitKey(0);
+        cv::destroyAllWindows();
+        
         return true;
     }
 

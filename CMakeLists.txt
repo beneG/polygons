@@ -167,7 +167,7 @@ include_directories(${PROTOBUF_ROOT_DIR}/src)
 
 # Add the executable targets
 #add_executable(server src/server.cpp src/yolo_detector.cpp src/polygon_utils.cpp)
-add_executable(server src/server.cpp)
+add_executable(server src/server.cpp src/yolo_detector.cpp)
 add_executable(client src/client.cpp)
 
 target_add_protobuf(server proto/exchange_protocol.proto)

@@ -20,7 +20,8 @@ COPY ./proto ./proto
 
 RUN mkdir -p src && \
     echo 'int main() { return 0; }' > src/server.cpp && \
-    echo 'int main() { return 0; }' > src/client.cpp
+    echo 'int main() { return 0; }' > src/client.cpp && \
+    echo 'int main() { return 0; }' > src/yolo_detector.cpp
 
 RUN cmake . && make grpc grpc++ libprotobuf grpc_cpp_plugin -j$(nproc)
 
