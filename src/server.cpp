@@ -69,7 +69,8 @@ public:
             std::cout << "Detected " << detections.size() << " objects\n";
             
             DrawDetections(image, detections);
-            
+            DrawPolygons(image, polygons);
+
             // Encode result image
             std::vector<uchar> encoded_image;
             std::vector<int> encode_params = {cv::IMWRITE_JPEG_QUALITY, 95};
@@ -123,6 +124,33 @@ public:
             // Draw label text
             cv::putText(image, label, cv::Point(det.bbox.x, label_y),
                         cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0), 1);
+        }
+    }
+
+
+    /**
+     * @brief Draws polygons on the image (EXCLUDE=red, INCLUDE=green)
+     * 
+     * @param image Image to draw on
+     * @param polygons Vector of polygons to draw
+     */
+    void DrawPolygons(cv::Mat& image, const std::vector<exchange_protocol::PolygonConfig>& polygons) const {
+        for (const auto& poly : polygons) {
+            std::vector<cv::Point> points;
+            for (const auto& vertex : poly.points()) {
+                points.emplace_back(vertex.x(), vertex.y());
+            }
+            if (points.size() < 3) {
+                continue; // Not a valid polygon
+            }
+            // Green for INCLUDE, Red for EXCLUDE
+            cv::Scalar color = (poly.type() == exchange_protocol::PolygonType::INCLUDE)
+                ? cv::Scalar(0, 255, 0)   // Green
+                : cv::Scalar(0, 0, 255);  // Red
+
+            const cv::Point* pts = points.data();
+            int npts = static_cast<int>(points.size());
+            cv::polylines(image, &pts, &npts, 1, true, color, 2);
         }
     }
 
