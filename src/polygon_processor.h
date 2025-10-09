@@ -51,7 +51,7 @@ public:
     }
     */
 
-    bool IsPointInPolygons(const cv::Point& point, int class_id) {
+    bool IsPointInPolygons(const cv::Point& point, int class_id) const {
 
         exchange_protocol::PolygonType highest_priority_type = exchange_protocol::PolygonType::EXCLUDE;
         int highest_priority = -1;

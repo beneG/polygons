@@ -148,9 +148,9 @@ public:
                 ? cv::Scalar(0, 255, 0)   // Green
                 : cv::Scalar(0, 0, 255);  // Red
 
-            const cv::Point* pts = points.data();
-            int npts = static_cast<int>(points.size());
-            cv::polylines(image, &pts, &npts, 1, true, color, 2);
+            const cv::Point* points_ptr = points.data();
+            int num_points = static_cast<int>(points.size());
+            cv::polylines(image, &points_ptr, &num_points, 1, true, color, 2);
         }
     }
 
