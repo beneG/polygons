@@ -11,7 +11,8 @@ WORKDIR /app
 
 RUN mkdir -p data/models && \
     wget https://github.com/pjreddie/darknet/raw/master/cfg/yolov3.cfg -O data/models/yolov3.cfg && \
-    wget https://data.pjreddie.com/files/yolov3.weights -O data/models/yolov3.weights
+    wget https://data.pjreddie.com/files/yolov3.weights -O data/models/yolov3.weights && \
+    wget https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names -O data/models/coco.names
 
 
 COPY ./CMakeLists.txt ./CMakeLists.txt
