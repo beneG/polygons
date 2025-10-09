@@ -26,7 +26,8 @@ public:
             }
             polygons_class_ids_.push_back(std::move(class_ids));
 
-            std::vector<cv::Point> points(poly.points().size());
+            std::vector<cv::Point> points;
+            points.reserve(poly.points().size());
             for (const auto& vertex : poly.points()) {
                 points.emplace_back(vertex.x(), vertex.y());
             }
