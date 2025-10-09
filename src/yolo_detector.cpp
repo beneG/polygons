@@ -1,32 +1,46 @@
 #include "yolo_detector.h"
+#include "polygon_processor.h"
 
 #include <opencv2/dnn.hpp>
 
 #include <fstream>
 #include <iostream>
 
-YoloDetector::YoloDetector(const std::string& cfg,
-                           const std::string& weights,
+YoloDetector::YoloDetector(const std::string& model_config_file,
+                           const std::string& model_weights_file,
                            const std::string& class_names_file,
                            float confidence_threshold,
                            float nms_threshold)
     : confidence_threshold_(confidence_threshold), nms_threshold_(nms_threshold)
 {
-    net_ = cv::dnn::readNetFromDarknet(cfg, weights);
+    net_ = cv::dnn::readNetFromDarknet(model_config_file, model_weights_file);
     net_.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
     net_.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
 
-    // Load class names
+    LoadClassNames(class_names_file);
+}
+
+void YoloDetector::LoadClassNames(const std::string& class_names_file)
+{
     std::ifstream ifs(class_names_file);
+    if (!ifs.is_open()) {
+        throw std::runtime_error("Failed to open class names file: " + class_names_file);
+    }
     std::string line;
+    int id = 0;
     while (std::getline(ifs, line)) {
         if (!line.empty()) {
-            class_names_.push_back(line);
+            // Trim whitespace
+            line.erase(0, line.find_first_not_of(" \t\r\n"));
+            line.erase(line.find_last_not_of(" \t\r\n") + 1);
+            class_name_to_id_[line] = id++;
+            class_names_.push_back(std::move(line));
         }
     }
 }
 
-std::vector<Detection> YoloDetector::Detect(const cv::Mat& frame)
+
+std::vector<Detection> YoloDetector::Detect(const cv::Mat& frame, const std::vector<exchange_protocol::PolygonConfig>& polygons)
 {
     std::vector<Detection> detections;
     if (frame.empty()) {
@@ -34,7 +48,7 @@ std::vector<Detection> YoloDetector::Detect(const cv::Mat& frame)
     }
 
     cv::Mat blob;
-    cv::dnn::blobFromImage(frame, blob, 1/255.0, cv::Size(416,416), cv::Scalar(), true, false);
+    cv::dnn::blobFromImage(frame, blob, 1/255.0, cv::Size(kInputWidth, kInputHeight), cv::Scalar(), true, false);
     net_.setInput(blob);
 
     std::vector<cv::Mat> outs;
@@ -73,17 +87,26 @@ std::vector<Detection> YoloDetector::Detect(const cv::Mat& frame)
     std::vector<int> indices;
     cv::dnn::NMSBoxes(boxes, confidences, confidence_threshold_, nms_threshold_, indices);
 
+    PolygonProcessor processor(polygons, class_name_to_id_);
+
     for (int idx : indices) {
         Detection det;
         det.class_id = classIds[idx];
         det.confidence = confidences[idx];
         det.bbox = boxes[idx];
+
+        det.center = cv::Point(det.bbox.x + det.bbox.width / 2, det.bbox.y + det.bbox.height / 2);
+
+        if (!processor.IsPointInPolygons(det.center, det.class_id)) {
+            continue;
+        }
+
         if (det.class_id >= 0 && det.class_id < static_cast<int>(class_names_.size())) {
             det.class_name = class_names_[det.class_id];
         } else {
             det.class_name = "unknown";
         }
-        detections.push_back(det);
+        detections.push_back(std::move(det));
     }
     return detections;
 }

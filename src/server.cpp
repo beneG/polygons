@@ -9,7 +9,6 @@
 #include "proto/exchange_protocol.pb.h"
 #include "proto/exchange_protocol.grpc.pb.h"
 #include "yolo_detector.h"
-#include "polygon_processor.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -46,7 +45,7 @@ public:
                         const DetectionRequest* request,
                         DetectionResponse* response) override {
     
-        std::cout << "=== Received DetectObjects request ===" << std::endl;
+        std::cout << "=== Received DetectObjects request === \n";
         
         try {
             // Decode image from request
@@ -59,43 +58,36 @@ public:
                             "Failed to decode input image");
             }
             
-            std::cout << "Image decoded: " << image.cols << "x" << image.rows << std::endl;
+            std::cout << "Image decoded: " << image.cols << "x" << image.rows << '\n';
             
-            // Perform object detection
-            std::vector<Detection> detections = detector_->Detect(image);
-            std::cout << "Detected " << detections.size() << " objects" << std::endl;
-            
-            
-            // Process polygons and filter detections
+
             std::vector<exchange_protocol::PolygonConfig> polygons(
                 request->polygons().begin(), request->polygons().end());
-            PolygonProcessor processor(polygons);
-            std::vector<Detection> filtered_detections = processor.FilterDetections(detections);
+
+            // Perform object detection
+            std::vector<Detection> detections = detector_->Detect(image, polygons);
+            std::cout << "Detected " << detections.size() << " objects\n";
             
-            // Draw results on image
-            cv::Mat result_image = image.clone();
-            processor.DrawPolygons(result_image);
-            DrawDetections(result_image, filtered_detections);
+            DrawDetections(image, detections);
             
             // Encode result image
             std::vector<uchar> encoded_image;
             std::vector<int> encode_params = {cv::IMWRITE_JPEG_QUALITY, 95};
             
-            if (!cv::imencode(".jpg", result_image, encoded_image, encode_params)) {
+            if (!cv::imencode(".jpg", image, encoded_image, encode_params)) {
                 return Status(StatusCode::INTERNAL, "Failed to encode result image");
             }
             
             response->set_result_image_data(encoded_image.data(), encoded_image.size());
             
             std::cout << "Detection completed successfully. Returning " 
-                      << filtered_detections.size() << " objects" << std::endl;
-            
+                      << detections.size() << " objects\n";
+
             return Status::OK;
             
         } catch (const std::exception& e) {
-                std::cerr << "Error during detection: " << e.what() << std::endl;
-                return Status(StatusCode::INTERNAL, 
-                              std::string("Detection error: ") + e.what());
+                std::cerr << "Error during detection: " << e.what() << '\n';
+                return Status(StatusCode::INTERNAL, std::string("Detection error: ") + e.what());
         }
     }
 
@@ -158,8 +150,8 @@ void RunServer(const std::string& server_address,
     builder.SetMaxSendMessageSize(100 * 1024 * 1024);
     
     std::unique_ptr<Server> server(builder.BuildAndStart());
-    std::cout << "Server listening on " << server_address << std::endl;
-    std::cout << "Ready to process detection requests..." << std::endl;
+    std::cout << "Server listening on " << server_address << '\n';
+    std::cout << "Ready to process detection requests...\n";
     
     server->Wait();
 }
@@ -183,12 +175,12 @@ int main(int argc, char** argv) {
     if (argc > 4) {
         class_names = argv[4];
     }
-    
-    std::cout << "Starting Object Detection Service..." << std::endl;
-    std::cout << "Model config: " << model_config << std::endl;
-    std::cout << "Model weights: " << model_weights << std::endl;
-    std::cout << "Class names: " << class_names << std::endl;
-    
+
+    std::cout << "Starting Object Detection Service...\n";
+    std::cout << "Model config: " << model_config << '\n';
+    std::cout << "Model weights: " << model_weights << '\n';
+    std::cout << "Class names: " << class_names << '\n';
+
     try {
         // Initialize YOLO detector
         auto detector = std::make_shared<YoloDetector>(
@@ -198,7 +190,7 @@ int main(int argc, char** argv) {
         RunServer(server_address, detector);
         
     } catch (const std::exception& e) {
-        std::cerr << "Fatal error: " << e.what() << std::endl;
+        std::cerr << "Fatal error: " << e.what() << '\n';
         return 1;
     }
     

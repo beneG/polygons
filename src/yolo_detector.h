@@ -5,6 +5,10 @@
 #include <vector>
 #include <opencv2/opencv.hpp>
 
+#include "proto/exchange_protocol.pb.h"
+#include <unordered_map>
+#include <unordered_set>
+
 
 /**
  * @brief Represents a detected object with bounding box and class information
@@ -35,8 +39,8 @@ public:
      * @param confidence_threshold Minimum confidence for detections (default: 0.5)
      * @param nms_threshold Non-Maximum Suppression threshold (default: 0.4)
      */
-    YoloDetector(const std::string& model_config,
-                 const std::string& model_weights,
+    YoloDetector(const std::string& model_config_file,
+                 const std::string& model_weights_file,
                  const std::string& class_names_file,
                  float confidence_threshold = 0.5f,
                  float nms_threshold = 0.4f);
@@ -47,7 +51,7 @@ public:
      * @param image Input image in BGR format
      * @return Vector of detected objects
      */
-    std::vector<Detection> Detect(const cv::Mat& image);
+    std::vector<Detection> Detect(const cv::Mat& image, const std::vector<exchange_protocol::PolygonConfig>& polygons);
 
     /**
      * @brief Gets the list of class names
@@ -80,9 +84,9 @@ private:
     /**
      * @brief Loads class names from file
      * 
-     * @param filename Path to file with class names (one per line)
+     * @param class_names_file Path to file with class names (one per line)
      */
-    void LoadClassNames(const std::string& filename);
+    void LoadClassNames(const std::string& class_names_file);
 
     /**
      * @brief Gets output layer names for YOLO model
@@ -95,6 +99,8 @@ private:
     std::vector<std::string> class_names_;  ///< List of class names
     float confidence_threshold_;            ///< Confidence threshold
     float nms_threshold_;                   ///< NMS threshold
+
+    std::unordered_map<std::string, int> class_name_to_id_; ///< Map from class name to ID
     
     static constexpr int kInputWidth = 416;   ///< YOLO input width
     static constexpr int kInputHeight = 416;  ///< YOLO input height
