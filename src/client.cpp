@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
     std::string server_address = "localhost:50051";
     std::string image_path = "input.jpg";
     std::string output_path = "output.jpg";
-    std::string polygons_path = "polygons.json";
+    std::string polygons_path = "assets/polygons.json";
     
     if (argc > 1) {
         image_path = argv[1];
