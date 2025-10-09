@@ -76,10 +76,14 @@ set(FETCHCONTENT_QUIET OFF)
 set(ABSL_PROPAGATE_CXX_STD ON)
 set(ABSL_ENABLE_INSTALL ON)
 
+set(BUILD_SHARED_LIBS ON)
+set(Protobuf_USE_STATIC_LIBS OFF)
+set(gRPC_BUILD_SHARED_LIBS ON)
+
 FetchContent_Declare(
         protobuf
         GIT_REPOSITORY https://github.com/google/protobuf.git
-        GIT_TAG        v3.19.3
+        GIT_TAG        v3.12.4
         GIT_PROGRESS   TRUE
         GIT_SHALLOW    TRUE
         USES_TERMINAL_DOWNLOAD TRUE
@@ -144,10 +148,10 @@ if(NOT grpc_POPULATED)
 endif()
 
 
-if(NOT TARGET protoc)
+if(NOT TARGET protobuf::protoc)
     message(FATAL_ERROR "Can not find target protoc")
 endif()
-set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protoc>)
+set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protobuf::protoc>)
 
 set(_gRPC_PROTO_GENS_DIR ${CMAKE_BINARY_DIR}/gens)
 file(MAKE_DIRECTORY ${_gRPC_PROTO_GENS_DIR})
@@ -174,8 +178,8 @@ target_add_protobuf(server proto/exchange_protocol.proto)
 target_add_protobuf(client proto/exchange_protocol.proto)
 
 # Link the executables against the OpenCV and gRPC libraries
-target_link_libraries(server PRIVATE ${OpenCV_LIBS} grpc grpc++ libprotobuf)
-target_link_libraries(client PRIVATE ${OpenCV_LIBS} grpc grpc++ libprotobuf)
+target_link_libraries(server PRIVATE ${OpenCV_LIBS} grpc grpc++ protobuf::libprotobuf)
+target_link_libraries(client PRIVATE ${OpenCV_LIBS} grpc grpc++ protobuf::libprotobuf)
 
 
 # Add unit tests
