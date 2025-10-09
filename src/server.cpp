@@ -49,9 +49,9 @@ public:
         
         try {
             // Decode image from request
-            std::vector<uchar> image_data(request->image_data().begin(), 
-                                        request->image_data().end());
-            cv::Mat image = cv::imdecode(image_data, cv::IMREAD_COLOR);
+            cv::Mat raw_data(1, request->image_data().size(), CV_8UC1, 
+                             (void *)request->image_data().data());
+            cv::Mat image = cv::imdecode(raw_data, cv::IMREAD_COLOR);
             
             if (image.empty()) {
                 return Status(StatusCode::INVALID_ARGUMENT, 
