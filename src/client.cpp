@@ -157,8 +157,8 @@ std::vector<PolygonConfig> LoadPolygonsFromJson(const std::string& filename) {
 // cmd string: ./client input.jpg output.jpg localhost:50051 assets/polygons.json
 int main(int argc, char** argv) {
     std::string server_address = "localhost:50051";
-    std::string image_path = "input.jpg";
-    std::string output_path = "output.jpg";
+    std::string image_path = "assets/input.jpg";
+    std::string output_path = "assets/output.jpg";
     std::string polygons_path = "assets/polygons.json";
     
     if (argc > 1) {
