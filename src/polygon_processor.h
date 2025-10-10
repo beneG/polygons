@@ -25,6 +25,11 @@ public:
                               const std::unordered_map<std::string, int>& class_name_to_id)
     {
         for (auto poly : polygons) {
+            if (poly.points().size() < 3) {
+                throw std::invalid_argument(
+                    "Polygon must have at least 3 points, got " + 
+                    std::to_string(poly.points().size()));
+            }
             PolygonData poly_data;
 
             for (const auto& class_name : poly.class_filters()) {

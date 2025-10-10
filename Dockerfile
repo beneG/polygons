@@ -34,4 +34,6 @@ COPY ./src ./src
 COPY ./tests ./tests
 
 RUN make -j$(nproc)
+RUN make -j$(nproc) test
+
 
