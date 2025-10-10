@@ -1,6 +1,9 @@
 
 cmake_minimum_required(VERSION 3.5)
 
+if(POLICY CMP0077)
+    cmake_policy(SET CMP0077 NEW)
+endif()
 
 function(target_add_protobuf target)
     if(NOT TARGET ${target})
@@ -12,9 +15,62 @@ function(target_add_protobuf target)
     endif()
 
     set(_protobuf_include_path -I . -I ${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR})
-    foreach(FIL ${ARGN})
-        get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
-        get_filename_component(FIL_WE ${FIL} NAME_WE)
+    # foreach(FIL ${ARGN})
+    #     get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
+    #     get_filename_component(FIL_WE ${FIL} NAME_WE)
+    #     file(RELATIVE_PATH REL_FIL ${CMAKE_CURRENT_SOURCE_DIR} ${ABS_FIL})
+    #     get_filename_component(REL_DIR ${REL_FIL} DIRECTORY)
+    #     if(NOT REL_DIR)
+    #         set(RELFIL_WE "${FIL_WE}")
+    #     else()
+    #         set(RELFIL_WE "${REL_DIR}/${FIL_WE}")
+    #     endif()
+
+    #     if(NOT TARGET grpc_cpp_plugin)
+    #         message(FATAL_ERROR "Can not find target grpc_cpp_plugin")
+    #     endif()
+    #     set(_gRPC_CPP_PLUGIN $<TARGET_FILE:grpc_cpp_plugin>)
+
+    #     add_custom_command(
+    #     OUTPUT  "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
+    #             "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.h"
+    #             "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
+    #             "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
+    #             "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
+    #     COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}
+    #     ARGS --grpc_out=generate_mock_code=true:${_gRPC_PROTO_GENS_DIR}
+    #         --cpp_out=${_gRPC_PROTO_GENS_DIR}
+    #         --plugin=protoc-gen-grpc=${_gRPC_CPP_PLUGIN}
+    #         ${_protobuf_include_path}
+    #         ${REL_FIL}
+    #     DEPENDS ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} ${_gRPC_CPP_PLUGIN}
+    #     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    #     COMMENT "Running gRPC C++ protocol buffer compiler on ${FIL}"
+    #     VERBATIM)
+
+    #     target_sources(${target} PRIVATE
+    #         "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
+    #         "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.h"
+    #         "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
+    #         "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
+    #         "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
+    #     )
+    #     target_include_directories(${target} PRIVATE
+    #         $<BUILD_INTERFACE:${_gRPC_PROTO_GENS_DIR}>
+    #         $<BUILD_INTERFACE:${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR}>
+    #         $<BUILD_INTERFACE:${grpc_SOURCE_DIR}/include>
+    #         $<BUILD_INTERFACE:${grpc_SOURCE_DIR}/third_party/abseil-cpp>
+    #     )
+    # endforeach()
+
+
+
+    #foreach(FIL ${ARGN})
+    
+        #get_filename_component(ABS_FIL ${ARGV1} ABSOLUTE)
+        #get_filename_component(FIL_WE ${ARGV1} NAME_WE)
+        get_filename_component(ABS_FIL proto/exchange_protocol.proto ABSOLUTE)
+        get_filename_component(FIL_WE proto/exchange_protocol.proto NAME_WE)
         file(RELATIVE_PATH REL_FIL ${CMAKE_CURRENT_SOURCE_DIR} ${ABS_FIL})
         get_filename_component(REL_DIR ${REL_FIL} DIRECTORY)
         if(NOT REL_DIR)
@@ -29,21 +85,22 @@ function(target_add_protobuf target)
         set(_gRPC_CPP_PLUGIN $<TARGET_FILE:grpc_cpp_plugin>)
 
         add_custom_command(
-        OUTPUT  "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
-                "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.h"
-                "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
-                "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
-                "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
-        COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}
-        ARGS --grpc_out=generate_mock_code=true:${_gRPC_PROTO_GENS_DIR}
-            --cpp_out=${_gRPC_PROTO_GENS_DIR}
-            --plugin=protoc-gen-grpc=${_gRPC_CPP_PLUGIN}
-            ${_protobuf_include_path}
-            ${REL_FIL}
-        DEPENDS ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} ${_gRPC_CPP_PLUGIN}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Running gRPC C++ protocol buffer compiler on ${FIL}"
-        VERBATIM)
+            OUTPUT  "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
+                    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.h"
+                    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
+                    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
+                    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
+            COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}
+            ARGS --grpc_out=generate_mock_code=true:${_gRPC_PROTO_GENS_DIR}
+                --cpp_out=${_gRPC_PROTO_GENS_DIR}
+                --plugin=protoc-gen-grpc=${_gRPC_CPP_PLUGIN}
+                ${_protobuf_include_path}
+                ${REL_FIL}
+            DEPENDS ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} ${_gRPC_CPP_PLUGIN}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Running gRPC C++ protocol buffer compiler on proto/exchange_protocol.proto"
+            VERBATIM
+        )
 
         target_sources(${target} PRIVATE
             "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
@@ -58,7 +115,9 @@ function(target_add_protobuf target)
             $<BUILD_INTERFACE:${grpc_SOURCE_DIR}/include>
             $<BUILD_INTERFACE:${grpc_SOURCE_DIR}/third_party/abseil-cpp>
         )
-    endforeach()
+    #endforeach()
+
+
 endfunction()
 
 
@@ -169,13 +228,83 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/models)
 include_directories(${PROTOBUF_ROOT_DIR}/src)
 
+#{#####################################################################################
+set(_protobuf_include_path -I . -I ${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR})
+
+
+get_filename_component(ABS_FIL proto/exchange_protocol.proto ABSOLUTE)
+get_filename_component(FIL_WE proto/exchange_protocol.proto NAME_WE)
+file(RELATIVE_PATH REL_FIL ${CMAKE_CURRENT_SOURCE_DIR} ${ABS_FIL})
+get_filename_component(REL_DIR ${REL_FIL} DIRECTORY)
+if(NOT REL_DIR)
+    set(RELFIL_WE "${FIL_WE}")
+else()
+    set(RELFIL_WE "${REL_DIR}/${FIL_WE}")
+endif()
+
+if(NOT TARGET grpc_cpp_plugin)
+    message(FATAL_ERROR "Can not find target grpc_cpp_plugin")
+endif()
+set(_gRPC_CPP_PLUGIN $<TARGET_FILE:grpc_cpp_plugin>)
+
+add_custom_command(
+    OUTPUT  "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
+            "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.h"
+            "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
+            "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
+            "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
+    COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}
+    ARGS --grpc_out=generate_mock_code=true:${_gRPC_PROTO_GENS_DIR}
+        --cpp_out=${_gRPC_PROTO_GENS_DIR}
+        --plugin=protoc-gen-grpc=${_gRPC_CPP_PLUGIN}
+        ${_protobuf_include_path}
+        ${REL_FIL}
+    DEPENDS ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} ${_gRPC_CPP_PLUGIN}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Running gRPC C++ protocol buffer compiler on proto/exchange_protocol.proto"
+    VERBATIM
+)
+
+
+#}#####################################################################################
+
 # Add the executable targets
 #add_executable(server src/server.cpp src/yolo_detector.cpp src/polygon_utils.cpp)
 add_executable(server src/server.cpp src/yolo_detector.cpp)
 add_executable(client src/client.cpp)
 
-target_add_protobuf(server proto/exchange_protocol.proto)
-target_add_protobuf(client proto/exchange_protocol.proto)
+#target_add_protobuf(server proto/exchange_protocol.proto)
+#target_add_protobuf(client proto/exchange_protocol.proto)
+#{##############################################################
+target_sources(server PRIVATE
+    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
+    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.h"
+    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
+    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
+    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
+)
+target_include_directories(server PRIVATE
+    $<BUILD_INTERFACE:${_gRPC_PROTO_GENS_DIR}>
+    $<BUILD_INTERFACE:${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR}>
+    $<BUILD_INTERFACE:${grpc_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${grpc_SOURCE_DIR}/third_party/abseil-cpp>
+)
+
+target_sources(client PRIVATE
+    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
+    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.h"
+    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
+    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
+    "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
+)
+target_include_directories(client PRIVATE
+    $<BUILD_INTERFACE:${_gRPC_PROTO_GENS_DIR}>
+    $<BUILD_INTERFACE:${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR}>
+    $<BUILD_INTERFACE:${grpc_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${grpc_SOURCE_DIR}/third_party/abseil-cpp>
+)
+#}##############################################################
+
 
 # Link the executables against the OpenCV and gRPC libraries
 target_link_libraries(server PRIVATE ${OpenCV_LIBS} grpc grpc++ protobuf::libprotobuf)
@@ -183,8 +312,8 @@ target_link_libraries(client PRIVATE ${OpenCV_LIBS} grpc grpc++ protobuf::libpro
 
 
 # Add unit tests
-#enable_testing()
-#add_subdirectory(tests)
+enable_testing()
+add_subdirectory(tests)
 
 
 # Add Doxygen documentation

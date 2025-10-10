@@ -6,6 +6,7 @@ ENV DEBIAN_FRONTEND="noninteractive"
 RUN apt-get update && apt-get install -y build-essential g++ cmake git wget
 RUN apt-get install -y libopencv-dev
 RUN apt-get install -y nlohmann-json3-dev
+RUN apt-get install -y libgtest-dev
 
 WORKDIR /app
 
@@ -18,14 +19,23 @@ RUN mkdir -p data/models && \
 COPY ./CMakeLists.txt ./CMakeLists.txt
 COPY ./proto ./proto
 
+
+RUN mkdir -p tests
+
+
+COPY ./tests/CMakeLists.txt ./tests/CMakeLists.txt
+
 RUN mkdir -p src && \
     echo 'int main() { return 0; }' > src/server.cpp && \
     echo 'int main() { return 0; }' > src/client.cpp && \
-    echo 'int main() { return 0; }' > src/yolo_detector.cpp
+    echo 'int main() { return 0; }' > src/yolo_detector.cpp && \
+    echo 'int main() { return 0; }' > tests/test_polygon_processor.cpp
 
-RUN cmake . && make grpc grpc++ libprotobuf grpc_cpp_plugin -j$(nproc)
+RUN cmake . && make libprotobuf grpc grpc++ grpc_cpp_plugin -j$(nproc)
 
 COPY ./src ./src
+
+COPY ./tests ./tests
 
 RUN make -j$(nproc)
 
