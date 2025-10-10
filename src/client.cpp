@@ -154,8 +154,6 @@ std::vector<PolygonConfig> LoadPolygonsFromJson(const std::string& filename) {
   return polygons;
 }
 
-// cmd string: ./client input.jpg output.jpg localhost:50051
-// assets/polygons.json
 int main(int argc, char** argv) {
   std::string server_address = "localhost:50051";
   std::string image_path = "assets/input.jpg";
@@ -184,24 +182,6 @@ int main(int argc, char** argv) {
       grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials()));
 
   std::vector<PolygonConfig> polygons = LoadPolygonsFromJson(polygons_path);
-
-  /*
-  // INCLUDE polygon - detect objects inside this area
-  polygons.push_back(CreatePolygon(
-      {{100, 100}, {500, 100}, {500, 400}, {100, 400}},
-      PolygonType::INCLUDE,
-      1,
-      {"person", "car"}
-  ));
-
-  // EXCLUDE polygon - ignore objects in this area
-  polygons.push_back(CreatePolygon(
-      {{200, 200}, {300, 200}, {300, 300}, {200, 300}},
-      PolygonType::EXCLUDE,
-      2,
-      {"person"}
-  ));
-  */
 
   // Call detection service
   if (client.DetectObjects(image_path, polygons, output_path)) {
