@@ -20,16 +20,12 @@ COPY ./CMakeLists.txt ./CMakeLists.txt
 COPY ./proto ./proto
 
 
-RUN mkdir -p tests
-
-
-COPY ./tests/CMakeLists.txt ./tests/CMakeLists.txt
-
-RUN mkdir -p src && \
+RUN mkdir -p src && mkdir -p tests && \
     echo 'int main() { return 0; }' > src/server.cpp && \
     echo 'int main() { return 0; }' > src/client.cpp && \
     echo 'int main() { return 0; }' > src/yolo_detector.cpp && \
-    echo 'int main() { return 0; }' > tests/test_polygon_processor.cpp
+    echo 'int main() { return 0; }' > tests/test_polygon_processor.cpp && \
+    echo 'int main() { return 0; }' > tests/test_yolo_detector.cpp
 
 RUN cmake . && make libprotobuf grpc grpc++ grpc_cpp_plugin -j$(nproc)
 
