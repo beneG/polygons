@@ -46,22 +46,6 @@ public:
         }
     }
     
-    /*
-    
-    // Draws the defined polygons on the image
-    void DrawPolygons(cv::Mat& image) {
-        for (const auto& poly : polygons_) {
-            std::vector<cv::Point> points;
-            for (const auto& vertex : poly.points()) {
-                points.emplace_back(vertex.x(), vertex.y());
-            }
-            const cv::Point* pts = points.data();
-            int npts = static_cast<int>(points.size());
-            cv::polylines(image, &pts, &npts, 1, true, cv::Scalar(0, 255, 0), 2);
-        }
-    }
-    */
-
     bool IsPointInPolygons(const cv::Point& point, int class_id) const {
         exchange_protocol::PolygonType highest_priority_type = exchange_protocol::PolygonType::EXCLUDE;
         int highest_priority = -1;
