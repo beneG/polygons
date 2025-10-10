@@ -60,7 +60,6 @@ A high-performance gRPC-based object detection service that uses YOLOv3 to detec
 │   ├── yolo_detector.cpp    # YOLO detector implementation
 │   └── polygon_processor.h  # Polygon filtering logic
 ├── tests/
-│   ├── CMakeLists.txt       # Test build configuration
 │   ├── test_polygon_processor.cpp  # Polygon tests
 │   └── test_yolo_detector.cpp      # YOLO tests
 ├── assets/
@@ -324,6 +323,12 @@ make docs
 xdg-open docs/html/index.html  # Linux
 open docs/html/index.html       # macOS
 ```
+
+### Generate Doxygen Documentation from Docker image
+```bash
+docker run --rm -it -w /app -v .:/app/docs image-detector-task make docs
+```
+This command will create `html` subdirectory in the current direcory on host
 
 ## Performance Considerations
 
