@@ -261,6 +261,14 @@ make test
 
 # Verbose output
 ctest --verbose
+
+```
+
+### Running Unit Tests from Docker container
+```bash
+# Run tests
+docker run --rm -it -w /app image-detector-task ctest
+
 ```
 
 ### Test Coverage
