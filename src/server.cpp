@@ -2,9 +2,15 @@
 #include <grpcpp/health_check_service_interface.h>
 
 #include <iostream>
-#include <memory>
-#include <opencv2/opencv.hpp>
 #include <string>
+#include <memory>
+#include <atomic>
+#include <thread>
+#include <chrono>
+#include <csignal>
+
+#include <opencv2/opencv.hpp>
+
 
 #include "proto/exchange_protocol.grpc.pb.h"
 #include "proto/exchange_protocol.pb.h"
@@ -158,6 +164,14 @@ class ObjectDetectorServiceImpl final : public ObjectDetectorService::Service {
   std::shared_ptr<YoloDetector> detector_;  ///< YOLO detector instance
 };
 
+std::atomic<bool> stop_requested(false);
+
+void HandleSignal(int signum) {
+  std::cout << "\nCaught signal " << signum << ", shutting down server..." << std::endl;
+  stop_requested = true;
+}
+
+
 /**
  * @brief Runs the gRPC server
  *
@@ -182,8 +196,21 @@ void RunServer(const std::string& server_address,
   std::cout << "Server listening on " << server_address << '\n';
   std::cout << "Ready to process detection requests...\n";
 
-  server->Wait();
+  // Setup signal handlers
+  std::signal(SIGINT, HandleSignal);
+  std::signal(SIGTERM, HandleSignal);
+
+  // Wait until user requests stop
+  while (!stop_requested) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+  }
+
+  // Shutdown gracefully
+  server->Shutdown();
+  std::cout << "Server stopped cleanly.\n";
+
 }
+
 
 int main(int argc, char** argv) {
   std::string server_address("0.0.0.0:50051");
