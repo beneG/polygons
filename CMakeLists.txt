@@ -10,6 +10,7 @@ project(ObjectDetectionService CXX)
 find_package(OpenCV REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(cxxopts REQUIRED)
 
 include(FetchContent)
 
@@ -168,6 +169,7 @@ add_executable(server src/server.cpp src/yolo_detector.cpp)
 target_link_libraries(server PRIVATE
     proto_lib
     spdlog::spdlog
+    cxxopts::cxxopts
     ${OpenCV_LIBS}
 )
 
@@ -175,6 +177,7 @@ target_link_libraries(server PRIVATE
 add_executable(client src/client.cpp)
 target_link_libraries(client PRIVATE
     proto_lib
+    cxxopts::cxxopts
     ${OpenCV_LIBS}
 )
 

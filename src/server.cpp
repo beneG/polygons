@@ -2,15 +2,17 @@
 #include <grpcpp/health_check_service_interface.h>
 
 #include <string>
+#include <vector>
 #include <memory>
 #include <atomic>
 #include <thread>
 #include <chrono>
 #include <csignal>
+#include <iostream>
 
 #include <opencv2/opencv.hpp>
 #include <spdlog/spdlog.h>
-
+#include <cxxopts.hpp>
 
 #include "proto/exchange_protocol.grpc.pb.h"
 #include "proto/exchange_protocol.pb.h"
@@ -217,27 +219,37 @@ void RunServer(const std::string& server_address,
 
 
 int main(int argc, char** argv) {
-  spdlog::set_level(spdlog::level::info);
-  spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%t] %v");
 
   std::string server_address("0.0.0.0:50051");
   std::string model_config = "data/models/yolov3.cfg";
   std::string model_weights = "data/models/yolov3.weights";
   std::string class_names = "data/models/coco.names";
 
-  // Parse command line arguments
-  if (argc > 1) {
-    server_address = argv[1];
+  cxxopts::Options options("server", "Object Detection gRPC Server");
+
+  options.add_options()
+    ("h, help", "Show help")
+    ("a, address", "Server address", cxxopts::value<std::string>(server_address))
+    ("c, config", "Model config file", cxxopts::value<std::string>(model_config))
+    ("w, weights", "Model weights file", cxxopts::value<std::string>(model_weights))
+    ("n, names", "Class names file", cxxopts::value<std::string>(class_names));
+
+  try {
+    auto result = options.parse(argc, argv);
+    if (result.count("help")) {
+      std::cout << options.help() << std::endl;
+      return 0;
+    }
+  } catch (const cxxopts::OptionException& e) {
+    std::cerr << "Error parsing options: " << e.what() << '\n';
+    std::cout << "Use --help to see usage." << '\n';
+    return 1;
   }
-  if (argc > 2) {
-    model_config = argv[2];
-  }
-  if (argc > 3) {
-    model_weights = argv[3];
-  }
-  if (argc > 4) {
-    class_names = argv[4];
-  }
+
+
+  spdlog::set_level(spdlog::level::info);
+  spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%t] %v");
+
 
   spdlog::info("Starting Object Detection Service...\n");
   spdlog::info("Model config file: {}", model_config);

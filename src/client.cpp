@@ -5,9 +5,12 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <string>
+
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
-#include <string>
+#include <cxxopts.hpp>
+
 
 using grpc::Channel;
 using grpc::ClientContext;
@@ -160,17 +163,26 @@ int main(int argc, char** argv) {
   std::string output_path = "assets/output.jpg";
   std::string polygons_path = "assets/polygons.json";
 
-  if (argc > 1) {
-    image_path = argv[1];
-  }
-  if (argc > 2) {
-    output_path = argv[2];
-  }
-  if (argc > 3) {
-    server_address = argv[3];
-  }
-  if (argc > 4) {
-    polygons_path = argv[4];
+  cxxopts::Options options("client", "Object Detection gRPC Client");
+
+  options.add_options()
+      ("h, help", "Show help")
+      ("a, address", "Server address", cxxopts::value<std::string>(server_address))
+      ("i, input_image", "Input image file", cxxopts::value<std::string>(image_path))
+      ("o, output_image", "Output image file", cxxopts::value<std::string>(output_path))
+      ("p, polygons", "Polygon config JSON file", cxxopts::value<std::string>(polygons_path));
+  
+  try {
+    auto result = options.parse(argc, argv);
+    if (result.count("help")) {
+      std::cout << options.help() << std::endl;
+      return 0;
+    }
+  } catch (const cxxopts::OptionException& e) {
+    std::cerr << "Error parsing options: " << e.what() << '\n';
+    std::cout << options.help() << std::endl;
+    std::cout << "Use --help to see usage." << '\n';
+    return 1;
   }
 
   std::cout << "Connecting to server: " << server_address << std::endl;

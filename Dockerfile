@@ -9,6 +9,7 @@ RUN apt-get install -y nlohmann-json3-dev
 RUN apt-get install -y libgtest-dev
 RUN apt-get install -y doxygen
 RUN apt-get install -y libspdlog-dev
+RUN apt-get install -y libcxxopts-dev
 
 WORKDIR /app
 
