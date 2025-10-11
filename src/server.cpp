@@ -241,7 +241,7 @@ int main(int argc, char** argv) {
   try {
     auto result = options.parse(argc, argv);
     if (result.count("help")) {
-      std::cout << options.help() << std::endl;
+      std::cout << options.help() << '\n';
       return 0;
     }
   } catch (const cxxopts::OptionException& e) {
@@ -255,7 +255,7 @@ int main(int argc, char** argv) {
   spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%t] %v");
 
 
-  spdlog::info("Starting Object Detection Service...\n");
+  spdlog::info("Starting Object Detection Service...");
   spdlog::info("Model config file: {}", model_config);
   spdlog::info("Model weights file: {}", model_weights);
   spdlog::info("Class names file: {}", class_names);

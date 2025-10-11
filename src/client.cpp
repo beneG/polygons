@@ -36,16 +36,15 @@ class ObjectDetectorClient {
     // Read and encode image
     cv::Mat image = cv::imread(image_path, cv::IMREAD_COLOR);
     if (image.empty()) {
-      std::cerr << "Failed to read image: " << image_path << std::endl;
+      std::cerr << "Failed to read image: " << image_path << '\n';
       return false;
     }
 
-    std::cout << "Image loaded: " << image.cols << "x" << image.rows
-              << std::endl;
+    std::cout << "Image loaded: " << image.cols << "x" << image.rows << '\n';
 
     std::vector<uchar> encoded_image;
     if (!cv::imencode(".jpg", image, encoded_image)) {
-      std::cerr << "Failed to encode image" << std::endl;
+      std::cerr << "Failed to encode image" << '\n';
       return false;
     }
 
@@ -57,8 +56,7 @@ class ObjectDetectorClient {
       *request.add_polygons() = polygon;
     }
 
-    std::cout << "Sending request with " << polygons.size() << " polygons..."
-              << std::endl;
+    std::cout << "Sending request with " << polygons.size() << " polygons..." << '\n';
 
     // Call RPC
     DetectionResponse response;
@@ -68,11 +66,11 @@ class ObjectDetectorClient {
 
     if (!status.ok()) {
       std::cerr << "RPC failed: " << status.error_code() << ": "
-                << status.error_message() << std::endl;
+                << status.error_message() << '\n';
       return false;
     }
 
-    std::cout << "Response received successfully" << std::endl;
+    std::cout << "Response received successfully" << '\n';
 
     // Decode and save result image
     std::vector<uchar> result_data(response.result_image_data().begin(),
@@ -80,22 +78,21 @@ class ObjectDetectorClient {
     cv::Mat result_image = cv::imdecode(result_data, cv::IMREAD_COLOR);
 
     if (result_image.empty()) {
-      std::cerr << "Failed to decode result image" << std::endl;
+      std::cerr << "Failed to decode result image" << '\n';
       return false;
     }
 
     if (!cv::imwrite(output_path, result_image)) {
-      std::cerr << "Failed to save result image to: " << output_path
-                << std::endl;
+      std::cerr << "Failed to save result image to: " << output_path << '\n';
       return false;
     }
 
-    std::cout << "Result saved to: " << output_path << std::endl;
+    std::cout << "Result saved to: " << output_path << '\n';
 
     // Display result
     cv::namedWindow("Detection Result", cv::WINDOW_NORMAL);
     cv::imshow("Detection Result", result_image);
-    std::cout << "Press any key to close..." << std::endl;
+    std::cout << "Press any key to close..." << '\n';
     cv::waitKey(0);
     cv::destroyAllWindows();
 
@@ -132,8 +129,7 @@ std::vector<PolygonConfig> LoadPolygonsFromJson(const std::string& filename) {
   std::vector<PolygonConfig> polygons;
   std::ifstream ifs(filename);
   if (!ifs) {
-    std::cerr << "Failed to open polygon config file: " << filename
-              << std::endl;
+    std::cerr << "Failed to open polygon config file: " << filename << '\n';
     return polygons;
   }
   json json_object;
@@ -175,19 +171,19 @@ int main(int argc, char** argv) {
   try {
     auto result = options.parse(argc, argv);
     if (result.count("help")) {
-      std::cout << options.help() << std::endl;
+      std::cout << options.help() << '\n';
       return 0;
     }
   } catch (const cxxopts::OptionException& e) {
     std::cerr << "Error parsing options: " << e.what() << '\n';
-    std::cout << options.help() << std::endl;
+    std::cout << options.help() << '\n';
     std::cout << "Use --help to see usage." << '\n';
     return 1;
   }
 
-  std::cout << "Connecting to server: " << server_address << std::endl;
-  std::cout << "Input image: " << image_path << std::endl;
-  std::cout << "Output image: " << output_path << std::endl;
+  std::cout << "Connecting to server: " << server_address << '\n';
+  std::cout << "Input image: " << image_path << '\n';
+  std::cout << "Output image: " << output_path << '\n';
 
   // Create client
   ObjectDetectorClient client(
@@ -197,10 +193,10 @@ int main(int argc, char** argv) {
 
   // Call detection service
   if (client.DetectObjects(image_path, polygons, output_path)) {
-    std::cout << "Detection completed successfully!" << std::endl;
+    std::cout << "Detection completed successfully!" << '\n';
     return 0;
   } else {
-    std::cerr << "Detection failed!" << std::endl;
+    std::cerr << "Detection failed!" << '\n';
     return 1;
   }
 }
