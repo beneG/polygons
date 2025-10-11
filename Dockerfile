@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install -y build-essential g++ cmake git wget
 RUN apt-get install -y libopencv-dev
 RUN apt-get install -y nlohmann-json3-dev
 RUN apt-get install -y libgtest-dev
-RUN apt-get install -y doxygen graphviz
+RUN apt-get install -y doxygen
+RUN apt-get install -y libspdlog-dev
 
 WORKDIR /app
 

@@ -1,7 +1,6 @@
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/health_check_service_interface.h>
 
-#include <iostream>
 #include <string>
 #include <memory>
 #include <atomic>
@@ -10,6 +9,7 @@
 #include <csignal>
 
 #include <opencv2/opencv.hpp>
+#include <spdlog/spdlog.h>
 
 
 #include "proto/exchange_protocol.grpc.pb.h"
@@ -49,7 +49,9 @@ class ObjectDetectorServiceImpl final : public ObjectDetectorService::Service {
    */
   Status DetectObjects(ServerContext* context, const DetectionRequest* request,
                        DetectionResponse* response) override {
-    std::cout << "=== Received DetectObjects request === \n";
+
+    spdlog::info("Received DetectObjects request: image size={} bytes, polygons={}",
+                 request->image_data().size(), request->polygons_size());
 
     try {
       // Decode image from request
@@ -62,14 +64,14 @@ class ObjectDetectorServiceImpl final : public ObjectDetectorService::Service {
                       "Failed to decode input image");
       }
 
-      std::cout << "Image decoded: " << image.cols << "x" << image.rows << '\n';
+      spdlog::info("Image decoded: {}x{}", image.cols, image.rows);
 
       std::vector<exchange_protocol::PolygonConfig> polygons(
           request->polygons().begin(), request->polygons().end());
 
       // Perform object detection
       std::vector<Detection> detections = detector_->Detect(image, polygons);
-      std::cout << "Detected " << detections.size() << " objects\n";
+      spdlog::info("Detected {} objects", detections.size());
 
       DrawDetections(image, detections);
       DrawPolygons(image, polygons);
@@ -85,13 +87,13 @@ class ObjectDetectorServiceImpl final : public ObjectDetectorService::Service {
       response->set_result_image_data(encoded_image.data(),
                                       encoded_image.size());
 
-      std::cout << "Detection completed successfully. Returning "
-                << detections.size() << " objects\n";
+      spdlog::info("Detection completed successfully. Returning {} objects",
+                   detections.size());
 
       return Status::OK;
 
     } catch (const std::exception& e) {
-      std::cerr << "Error during detection: " << e.what() << '\n';
+      spdlog::error("Error during detection: {}", e.what());
       return Status(StatusCode::INTERNAL,
                     std::string("Detection error: ") + e.what());
     }
@@ -195,8 +197,8 @@ void RunServer(const std::string& server_address,
   builder.SetMaxSendMessageSize(kMaxMessageSizeBytes);
 
   std::unique_ptr<Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on " << server_address << '\n';
-  std::cout << "Ready to process detection requests...\n";
+  spdlog::info("Server started and listening on {}", server_address);
+  spdlog::info("Ready to process detection requests...");
 
   // Setup signal handlers
   std::signal(SIGINT, HandleSignal);
@@ -209,12 +211,15 @@ void RunServer(const std::string& server_address,
 
   // Shutdown gracefully
   server->Shutdown();
-  std::cout << "Server stopped cleanly.\n";
+  spdlog::info("Server stopped cleanly.");
 
 }
 
 
 int main(int argc, char** argv) {
+  spdlog::set_level(spdlog::level::info);
+  spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%t] %v");
+
   std::string server_address("0.0.0.0:50051");
   std::string model_config = "data/models/yolov3.cfg";
   std::string model_weights = "data/models/yolov3.weights";
@@ -234,10 +239,10 @@ int main(int argc, char** argv) {
     class_names = argv[4];
   }
 
-  std::cout << "Starting Object Detection Service...\n";
-  std::cout << "Model config: " << model_config << '\n';
-  std::cout << "Model weights: " << model_weights << '\n';
-  std::cout << "Class names: " << class_names << '\n';
+  spdlog::info("Starting Object Detection Service...\n");
+  spdlog::info("Model config file: {}", model_config);
+  spdlog::info("Model weights file: {}", model_weights);
+  spdlog::info("Class names file: {}", class_names);
 
   try {
     // Initialize YOLO detector
@@ -248,7 +253,7 @@ int main(int argc, char** argv) {
     RunServer(server_address, detector);
 
   } catch (const std::exception& e) {
-    std::cerr << "Fatal error: " << e.what() << '\n';
+    spdlog::error("Fatal error: {}", e.what());
     return 1;
   }
 

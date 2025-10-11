@@ -9,6 +9,7 @@ project(ObjectDetectionService CXX)
 # Find required packages
 find_package(OpenCV REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(spdlog REQUIRED)
 
 include(FetchContent)
 
@@ -166,6 +167,7 @@ target_link_libraries(proto_lib PUBLIC
 add_executable(server src/server.cpp src/yolo_detector.cpp)
 target_link_libraries(server PRIVATE
     proto_lib
+    spdlog::spdlog
     ${OpenCV_LIBS}
 )
 
