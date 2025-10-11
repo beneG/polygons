@@ -10,16 +10,8 @@
 
 #include "proto/exchange_protocol.pb.h"
 
-/**
- * @brief Represents a detected object with bounding box and class information
- */
-struct Detection {
-  int class_id;            ///< Class ID from COCO dataset
-  std::string class_name;  ///< Human-readable class name
-  float confidence;        ///< Detection confidence score (0.0 - 1.0)
-  cv::Rect bbox;           ///< Bounding box coordinates
-  cv::Point center;        ///< Center point of the bounding box
-};
+#include "idetector.h"
+
 
 /**
  * @brief YOLO-based object detector using OpenCV DNN module
@@ -28,7 +20,7 @@ struct Detection {
  * on input images. It supports filtering by confidence threshold
  * and Non-Maximum Suppression (NMS).
  */
-class YoloDetector {
+class YoloDetector : public IObjectDetector {
  public:
   /**
    * @brief Constructs a YoloDetector with model files
@@ -53,21 +45,23 @@ class YoloDetector {
    */
   std::vector<Detection> Detect(
       const cv::Mat& image,
-      const std::vector<exchange_protocol::PolygonConfig>& polygons);
+      const std::vector<exchange_protocol::PolygonConfig>& polygons) override;
 
   /**
    * @brief Gets the list of class names
    *
    * @return Vector of class names
    */
-  const std::vector<std::string>& GetClassNames() const { return class_names_; }
+  const std::vector<std::string>& GetClassNames() const noexcept {
+    return class_names_;
+  }
 
   /**
    * @brief Sets confidence threshold
    *
    * @param threshold New confidence threshold value (0.0 - 1.0)
    */
-  void SetConfidenceThreshold(float threshold) {
+  void SetConfidenceThreshold(float threshold) noexcept {
     std::lock_guard<std::mutex> lock(net_mutex_);
     confidence_threshold_ = threshold;
   }
@@ -77,7 +71,7 @@ class YoloDetector {
    *
    * @param threshold New NMS threshold value (0.0 - 1.0)
    */
-  void SetNmsThreshold(float threshold) {
+  void SetNmsThreshold(float threshold) noexcept {
     std::lock_guard<std::mutex> lock(net_mutex_);
     nms_threshold_ = threshold;
   }

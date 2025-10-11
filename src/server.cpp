@@ -38,7 +38,7 @@ class ObjectDetectorServiceImpl final : public ObjectDetectorService::Service {
    *
    * @param detector Shared pointer to YOLO detector instance
    */
-  explicit ObjectDetectorServiceImpl(std::shared_ptr<YoloDetector> detector)
+  explicit ObjectDetectorServiceImpl(std::shared_ptr<IObjectDetector> detector)
       : detector_(std::move(detector)) {}
 
   /**
@@ -169,7 +169,7 @@ class ObjectDetectorServiceImpl final : public ObjectDetectorService::Service {
     }
   }
 
-  std::shared_ptr<YoloDetector> detector_;  ///< YOLO detector instance
+  std::shared_ptr<IObjectDetector> detector_;
 };
 
 std::atomic<bool> stop_requested(false);
@@ -183,10 +183,10 @@ void HandleSignal(int signum) {
  * @brief Runs the gRPC server
  *
  * @param server_address Address to bind the server (e.g., "0.0.0.0:50051")
- * @param detector YOLO detector instance
+ * @param detector IObjectDetector instance
  */
 void RunServer(const std::string& server_address,
-               std::shared_ptr<YoloDetector> detector) {
+               std::shared_ptr<IObjectDetector> detector) {
   ObjectDetectorServiceImpl service(detector);
 
   grpc::EnableDefaultHealthCheckService(true);
