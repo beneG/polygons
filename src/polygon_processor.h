@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <limits>
 
 #include "proto/exchange_protocol.pb.h"
 /**
@@ -76,23 +77,24 @@ class PolygonProcessor {
    * @return true if detection should be shown, false otherwise
    */
   bool IsPointInPolygons(const cv::Point& point, int class_id) const {
-    exchange_protocol::PolygonType highest_priority_type =
-        exchange_protocol::PolygonType::EXCLUDE;
-    int highest_priority = -1;
+    int highest_priority = std::numeric_limits<int>::min();
+    bool found_polygon = false;
+    exchange_protocol::PolygonType highest_priority_type;
 
     for (const auto& poly : polygons_) {
-      if (poly.class_ids.count(class_id) == 0) {
+      if (poly.class_ids.empty() || poly.class_ids.count(class_id) == 0) {
         continue;
       }
       if (!poly.bbox.contains(point)) {
         continue;  // Cheap test to avoid expensive pointPolygonTest
       }
-
       if (cv::pointPolygonTest(poly.points, point, false) >= 0) {
-        if (poly.priority > highest_priority) {
+        if (!found_polygon || poly.priority > highest_priority) {
           highest_priority = poly.priority;
           highest_priority_type = poly.type;
+          found_polygon = true;
         } else if (poly.priority == highest_priority) {
+          // In case of equal priority EXCLUDE wins
           if (poly.type == exchange_protocol::PolygonType::EXCLUDE) {
             highest_priority_type = exchange_protocol::PolygonType::EXCLUDE;
           }
@@ -100,6 +102,9 @@ class PolygonProcessor {
       }
     }
 
+    if (!found_polygon) {
+        return false;
+    }
     if (highest_priority_type == exchange_protocol::PolygonType::INCLUDE) {
       return true;
     }
