@@ -46,6 +46,18 @@ std::vector<Detection> YoloDetector::Detect(
     return detections;
   }
 
+  static constexpr int kMaxImageDimension = 10000;
+  if (frame.cols > kMaxImageDimension || frame.rows > kMaxImageDimension) {
+      throw std::invalid_argument(
+          "Image dimensions exceed maximum allowed size: " +
+          std::to_string(kMaxImageDimension));
+  }
+  
+  if (frame.cols < 32 || frame.rows < 32) {
+      throw std::invalid_argument("Image too small for detection");
+  }
+
+
   cv::Mat blob;
   cv::dnn::blobFromImage(frame, blob, 1 / 255.0,
                          cv::Size(kInputWidth, kInputHeight), cv::Scalar(),
