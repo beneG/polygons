@@ -1,14 +1,14 @@
 [
   {
-    "points": [[100,100],[500,100],[500,400],[100,400]],
+    "points": [[605, 244],[470, 521],[701, 518]],
     "type": "INCLUDE",
     "priority": 1,
-    "class_filters": ["person", "car"]
+    "class_filters": ["dog", "teddy bear"]
   },
   {
-    "points": [[200,200],[300,200],[300,300],[200,300]],
-    "type": "EXCLUDE",
+    "points": [[116, 334],[344, 322],[313, 553],[99, 564]],
+    "type": "INCLUDE",
     "priority": 2,
-    "class_filters": ["person"]
+    "class_filters": ["teddy bear", "chair"]
   }
 ]
