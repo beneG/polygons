@@ -90,11 +90,17 @@ class ObjectDetectorClient {
     std::cout << "Result saved to: " << output_path << '\n';
 
     // Display result
-    cv::namedWindow("Detection Result", cv::WINDOW_NORMAL);
-    cv::imshow("Detection Result", result_image);
-    std::cout << "Press any key to close..." << '\n';
-    cv::waitKey(0);
-    cv::destroyAllWindows();
+    try {
+      cv::namedWindow("Detection Result", cv::WINDOW_NORMAL);
+      cv::imshow("Detection Result", result_image);
+      std::cout << "Press any key to close..." << '\n';
+      cv::waitKey(0);
+      cv::destroyAllWindows();
+    } catch (const cv::Exception& e) {
+      std::cerr << "OpenCV GUI error: " << e.what() << '\n';
+      // Continue without displaying
+      cv::destroyAllWindows();
+    }
 
     return true;
   }
