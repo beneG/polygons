@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <mutex>
 
 #include "proto/exchange_protocol.pb.h"
 
@@ -93,6 +94,7 @@ class YoloDetector {
   std::vector<std::string> GetOutputLayerNames();
 
   cv::dnn::Net net_;                      ///< OpenCV DNN network
+  std::mutex net_mutex_;                  ///< Mutex for thread-safe access to net
   std::vector<std::string> class_names_;  ///< List of class names
   float confidence_threshold_;            ///< Confidence threshold
   float nms_threshold_;                   ///< NMS threshold

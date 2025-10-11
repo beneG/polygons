@@ -41,6 +41,9 @@ void YoloDetector::LoadClassNames(const std::string& class_names_file) {
 std::vector<Detection> YoloDetector::Detect(
     const cv::Mat& frame,
     const std::vector<exchange_protocol::PolygonConfig>& polygons) {
+
+  std::lock_guard<std::mutex> lock(net_mutex_);
+
   std::vector<Detection> detections;
   if (frame.empty()) {
     return detections;
