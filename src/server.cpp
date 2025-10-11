@@ -167,8 +167,7 @@ class ObjectDetectorServiceImpl final : public ObjectDetectorService::Service {
 std::atomic<bool> stop_requested(false);
 
 void HandleSignal(int signum) {
-  std::cout << "\nCaught signal " << signum << ", shutting down server..." << std::endl;
-  stop_requested = true;
+  stop_requested.store(true, std::memory_order_release);
 }
 
 
@@ -201,7 +200,7 @@ void RunServer(const std::string& server_address,
   std::signal(SIGTERM, HandleSignal);
 
   // Wait until user requests stop
-  while (!stop_requested) {
+  while (!stop_requested.load()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
 
