@@ -145,8 +145,12 @@ class ObjectDetectorServiceImpl final : public ObjectDetectorService::Service {
   void DrawPolygons(
       cv::Mat& image,
       const std::vector<exchange_protocol::PolygonConfig>& polygons) const {
+
+    std::vector<cv::Point> points;
+    points.reserve(20);
+
     for (const auto& poly : polygons) {
-      std::vector<cv::Point> points;
+      points.clear();
       for (const auto& vertex : poly.points()) {
         points.emplace_back(vertex.x(), vertex.y());
       }
