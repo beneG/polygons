@@ -188,8 +188,11 @@ void RunServer(const std::string& server_address,
   builder.RegisterService(&service);
 
   // Set max message size to 100MB for large images
-  builder.SetMaxReceiveMessageSize(100 * 1024 * 1024);
-  builder.SetMaxSendMessageSize(100 * 1024 * 1024);
+  static constexpr int kMaxMessageSizeMB = 100;
+  static constexpr int kMaxMessageSizeBytes = kMaxMessageSizeMB * 1024 * 1024;
+
+  builder.SetMaxReceiveMessageSize(kMaxMessageSizeBytes);
+  builder.SetMaxSendMessageSize(kMaxMessageSizeBytes);
 
   std::unique_ptr<Server> server(builder.BuildAndStart());
   std::cout << "Server listening on " << server_address << '\n';
