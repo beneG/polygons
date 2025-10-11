@@ -32,8 +32,8 @@ void YoloDetector::LoadClassNames(const std::string& class_names_file) {
     line.erase(0, line.find_first_not_of(" \t\r\n"));
     line.erase(line.find_last_not_of(" \t\r\n") + 1);
     if (!line.empty()) {
-      class_name_to_id_[line] = id++;
-      class_names_.push_back(std::move(line));
+      class_names_.push_back(line);
+      class_name_to_id_.emplace(std::move(line), id++);
     }
   }
 }
