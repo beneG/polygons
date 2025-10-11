@@ -33,7 +33,8 @@ class PolygonProcessor {
   explicit PolygonProcessor(
       const std::vector<exchange_protocol::PolygonConfig>& polygons,
       const std::unordered_map<std::string, int>& class_name_to_id) {
-    for (auto poly : polygons) {
+
+    for (const auto& poly : polygons) {
       if (poly.points().size() < 3) {
         throw std::invalid_argument(
             "Polygon must have at least 3 points, got " +

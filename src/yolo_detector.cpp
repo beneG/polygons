@@ -28,10 +28,10 @@ void YoloDetector::LoadClassNames(const std::string& class_names_file) {
   std::string line;
   int id = 0;
   while (std::getline(ifs, line)) {
+    // Trim whitespace
+    line.erase(0, line.find_first_not_of(" \t\r\n"));
+    line.erase(line.find_last_not_of(" \t\r\n") + 1);
     if (!line.empty()) {
-      // Trim whitespace
-      line.erase(0, line.find_first_not_of(" \t\r\n"));
-      line.erase(line.find_last_not_of(" \t\r\n") + 1);
       class_name_to_id_[line] = id++;
       class_names_.push_back(std::move(line));
     }
