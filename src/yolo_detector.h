@@ -68,6 +68,7 @@ class YoloDetector {
    * @param threshold New confidence threshold value (0.0 - 1.0)
    */
   void SetConfidenceThreshold(float threshold) {
+    std::lock_guard<std::mutex> lock(net_mutex_);
     confidence_threshold_ = threshold;
   }
 
@@ -76,7 +77,10 @@ class YoloDetector {
    *
    * @param threshold New NMS threshold value (0.0 - 1.0)
    */
-  void SetNmsThreshold(float threshold) { nms_threshold_ = threshold; }
+  void SetNmsThreshold(float threshold) {
+    std::lock_guard<std::mutex> lock(net_mutex_);
+    nms_threshold_ = threshold;
+  }
 
  private:
   /**
